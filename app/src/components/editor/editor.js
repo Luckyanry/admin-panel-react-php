@@ -5,8 +5,10 @@ import UIkit from "uikit";
 import "../../helpers/iframeLoader";
 import DOMHelper from "../../helpers/dom-helper";
 
-import EditorText from "../editor-text/editor-text";
-import Spinner from "../spinner/spinner";
+import EditorText from "../editor-text";
+import Spinner from "../spinner";
+import ComfirmModal from "../confirm-modal";
+import ChooseModal from "../choose-modal";
 
 export default class Editor extends Component {
   constructor() {
@@ -22,13 +24,20 @@ export default class Editor extends Component {
     this.createNewPage = this.createNewPage.bind(this);
     this.isLoading = this.isLoading.bind(this);
     this.isLoaded = this.isLoaded.bind(this);
+    this.save = this.save.bind(this);
+    this.init = this.init.bind(this);
   }
 
   componentDidMount() {
-    this.init(this.currentPage);
+    this.init(null, this.currentPage);
   }
 
-  init(page) {
+  init(e, page) {
+    if (e) {
+      e.preventDefault();
+    }
+
+    this.isLoading();
     this.iframe = document.querySelector("iframe");
     this.open(page, this.isLoaded);
     this.loadPageList();
@@ -47,7 +56,8 @@ export default class Editor extends Component {
       })
       .then(DOMHelper.serializeDOMToString)
       .then((html) => axios.post("./api/saveTempPage.php", {html}))
-      .then(() => this.iframe.load("../temp.html"))
+      .then(() => this.iframe.load("../temp-page-dont-change.html"))
+      .then(() => axios.post("./api/deleteTempPage.php"))
       .then(() => this.enableEditing())
       .then(() => this.injectStyles())
       .then(cb);
@@ -98,7 +108,9 @@ export default class Editor extends Component {
   }
 
   loadPageList() {
-    axios.get("./api").then((res) => this.setState({pageList: res.data}));
+    axios
+      .get("./api/pageList.php")
+      .then((res) => this.setState({pageList: res.data}));
   }
 
   createNewPage() {
@@ -110,7 +122,7 @@ export default class Editor extends Component {
 
   deletePage(page) {
     axios
-      .post("./api/deletePage.php", {name: page})
+      .post("./api/deleteTempPage.php", {name: page})
       .then(this.loadPageList())
       .catch(() => alert("Page not found!"));
   }
@@ -126,7 +138,7 @@ export default class Editor extends Component {
   }
 
   render() {
-    const {loading} = this.state;
+    const {loading, pageList} = this.state;
     const modal = true;
     let spinner;
 
@@ -140,7 +152,15 @@ export default class Editor extends Component {
 
         <div className="panel">
           <button
-            className="uk-button uk-button-primary"
+            className="uk-button uk-button-primary uk-margin-small-right"
+            type="button"
+            uk-toggle="target: #modal-open"
+          >
+            Select page
+          </button>
+
+          <button
+            className="uk-button uk-button-primary uk-margin-small-right"
             type="button"
             uk-toggle="target: #modal-save"
           >
@@ -171,46 +191,13 @@ export default class Editor extends Component {
           </button>
         </div>
 
-        <div id="modal-save" uk-modal={modal.toString()}>
-          <div className="uk-modal-dialog uk-modal-body">
-            <h2 className="uk-modal-title">Preservation</h2>
-
-            <p>Are you sure you want to save the changes?</p>
-
-            <p className="uk-text-right">
-              <button
-                className="uk-button uk-button-default uk-modal-close"
-                type="button"
-                onClick={() => console.log("Test3")}
-              >
-                Cancel
-              </button>
-
-              <button
-                className="uk-button uk-button-primary uk-modal-close"
-                type="button"
-                onClick={() =>
-                  this.save(
-                    () => {
-                      UIkit.notification({
-                        message: "Successfully saved",
-                        status: "success",
-                      });
-                    },
-                    () => {
-                      UIkit.notification({
-                        message: "Changes not saved!",
-                        status: "danger",
-                      });
-                    }
-                  )
-                }
-              >
-                Save
-              </button>
-            </p>
-          </div>
-        </div>
+        <ComfirmModal modal={modal} target={"modal-save"} method={this.save} />
+        <ChooseModal
+          modal={modal}
+          target={"modal-open"}
+          data={pageList}
+          redirect={this.init}
+        />
       </>
     );
   }

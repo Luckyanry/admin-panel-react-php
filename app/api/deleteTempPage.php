@@ -1,7 +1,5 @@
 <?php
-$_POST = json_decode(file_get_contents("php://input"), true);
-
-$file = "../../" . $_POST["name"];
+$file = "../../temp-page-dont-change.html"; // захардкодилиб щоб ніхто не змінив копію нашої головної сторінки
 
 if (file_exists($file)) {
   unlink($file); // спеціальна змінна яка в php видаляє вказаний файл
