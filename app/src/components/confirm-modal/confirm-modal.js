@@ -13,7 +13,6 @@ const ComfirmModal = ({modal, target, method}) => {
           <button
             className="uk-button uk-button-default uk-modal-close"
             type="button"
-            onClick={() => console.log("Test3")}
           >
             Cancel
           </button>

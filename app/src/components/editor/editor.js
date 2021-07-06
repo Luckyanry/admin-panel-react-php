@@ -9,6 +9,7 @@ import EditorText from "../editor-text";
 import Spinner from "../spinner";
 import ComfirmModal from "../confirm-modal";
 import ChooseModal from "../choose-modal";
+import Panel from "../panel";
 
 export default class Editor extends Component {
   constructor() {
@@ -17,15 +18,16 @@ export default class Editor extends Component {
     this.currentPage = "index.html";
     this.state = {
       pageList: [],
+      backupsList: [],
       newPageName: "",
       loading: true,
     };
 
-    this.createNewPage = this.createNewPage.bind(this);
     this.isLoading = this.isLoading.bind(this);
     this.isLoaded = this.isLoaded.bind(this);
     this.save = this.save.bind(this);
     this.init = this.init.bind(this);
+    this.restoreBackup = this.restoreBackup.bind(this);
   }
 
   componentDidMount() {
@@ -41,6 +43,7 @@ export default class Editor extends Component {
     this.iframe = document.querySelector("iframe");
     this.open(page, this.isLoaded);
     this.loadPageList();
+    this.loadBackupsList();
   }
 
   open(page, cb) {
@@ -61,20 +64,24 @@ export default class Editor extends Component {
       .then(() => this.enableEditing())
       .then(() => this.injectStyles())
       .then(cb);
+
+    this.loadBackupsList();
   }
 
-  save(onSuccess, onError) {
+  async save(onSuccess, onError) {
     this.isLoading();
     const newDom = this.virtualDom.cloneNode(this.virtualDom);
 
     DOMHelper.unwrapTextNodes(newDom);
     const html = DOMHelper.serializeDOMToString(newDom);
 
-    axios
+    await axios
       .post("./api/savePage.php", {pageName: this.currentPage, html})
       .then(onSuccess)
       .catch(onError)
       .finally(this.isLoaded);
+
+    this.loadBackupsList();
   }
 
   enableEditing() {
@@ -113,18 +120,34 @@ export default class Editor extends Component {
       .then((res) => this.setState({pageList: res.data}));
   }
 
-  createNewPage() {
-    axios
-      .post("./api/createNewPage.php", {name: this.state.newPageName})
-      .then(this.loadPageList())
-      .catch(() => alert("The page already exists!"));
+  loadBackupsList() {
+    axios.get("./backups/backups.json").then((res) =>
+      this.setState({
+        backupsList: res.data.filter((backup) => {
+          return backup.page === this.currentPage;
+        }),
+      })
+    );
   }
 
-  deletePage(page) {
-    axios
-      .post("./api/deleteTempPage.php", {name: page})
-      .then(this.loadPageList())
-      .catch(() => alert("Page not found!"));
+  restoreBackup(e, backup) {
+    if (e) {
+      e.preventDefault();
+    }
+
+    UIkit.modal
+      .confirm(
+        "Are you sure you want to restore the page from this backup? All unsaved data will be lost!",
+        {labels: {ok: "Restore", cancel: "Cancel"}}
+      )
+      .then(() => {
+        this.isLoading();
+        return axios.post("./api/restoreBackup.php", {
+          page: this.currentPage,
+          file: backup,
+        });
+      })
+      .then(() => this.open(this.currentPage, this.isLoaded));
   }
 
   isLoading() {
@@ -138,58 +161,21 @@ export default class Editor extends Component {
   }
 
   render() {
-    const {loading, pageList} = this.state;
+    const {loading, pageList, backupsList} = this.state;
     const modal = true;
     let spinner;
+
+    console.log(backupsList);
 
     loading ? (spinner = <Spinner active />) : <Spinner />;
 
     return (
       <>
-        <iframe src={this.currentPage} frameBorder="0"></iframe>
+        <iframe src="" frameBorder="0"></iframe>
 
         {spinner}
 
-        <div className="panel">
-          <button
-            className="uk-button uk-button-primary uk-margin-small-right"
-            type="button"
-            uk-toggle="target: #modal-open"
-          >
-            Select page
-          </button>
-
-          <button
-            className="uk-button uk-button-primary uk-margin-small-right"
-            type="button"
-            uk-toggle="target: #modal-save"
-          >
-            Publish
-          </button>
-
-          <button
-            className="uk-button uk-button-primary"
-            type="button"
-            onClick={() =>
-              this.save(
-                () => {
-                  UIkit.notification({
-                    message: "Successfully saved",
-                    status: "success",
-                  });
-                },
-                () => {
-                  UIkit.notification({
-                    message: "Changes not saved!",
-                    status: "danger",
-                  });
-                }
-              )
-            }
-          >
-            Save
-          </button>
-        </div>
+        <Panel method={this.save} />
 
         <ComfirmModal modal={modal} target={"modal-save"} method={this.save} />
         <ChooseModal
@@ -197,6 +183,12 @@ export default class Editor extends Component {
           target={"modal-open"}
           data={pageList}
           redirect={this.init}
+        />
+        <ChooseModal
+          modal={modal}
+          target={"modal-backup"}
+          data={backupsList}
+          redirect={this.restoreBackup}
         />
       </>
     );
