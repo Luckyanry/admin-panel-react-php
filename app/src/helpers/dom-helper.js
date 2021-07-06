@@ -1,5 +1,5 @@
 export default class DOMHelper {
-  static parseStringToDOM(str) {
+  static parseStrToDOM(str) {
     const parser = new DOMParser();
     return parser.parseFromString(str, "text/html");
   }
