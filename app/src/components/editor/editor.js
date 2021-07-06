@@ -10,6 +10,7 @@ import Spinner from "../spinner";
 import ComfirmModal from "../confirm-modal";
 import ChooseModal from "../choose-modal";
 import Panel from "../panel";
+import EditorMeta from "../editor-meta";
 
 export default class Editor extends Component {
   constructor() {
@@ -150,6 +151,23 @@ export default class Editor extends Component {
       .then(() => this.open(this.currentPage, this.isLoaded));
   }
 
+  savePageHandler(method) {
+    method(
+      () => {
+        UIkit.notification({
+          message: "Successfully saved",
+          status: "success",
+        });
+      },
+      () => {
+        UIkit.notification({
+          message: "Changes not saved!",
+          status: "danger",
+        });
+      }
+    );
+  }
+
   isLoading() {
     this.setState({loading: true});
   }
@@ -165,8 +183,6 @@ export default class Editor extends Component {
     const modal = true;
     let spinner;
 
-    console.log(backupsList);
-
     loading ? (spinner = <Spinner active />) : <Spinner />;
 
     return (
@@ -175,9 +191,14 @@ export default class Editor extends Component {
 
         {spinner}
 
-        <Panel method={this.save} />
+        <Panel savePageHandler={this.savePageHandler} method={this.save} />
 
-        <ComfirmModal modal={modal} target={"modal-save"} method={this.save} />
+        <ComfirmModal
+          modal={modal}
+          target={"modal-save"}
+          savePageHandler={this.savePageHandler}
+          method={this.save}
+        />
         <ChooseModal
           modal={modal}
           target={"modal-open"}
@@ -190,6 +211,16 @@ export default class Editor extends Component {
           data={backupsList}
           redirect={this.restoreBackup}
         />
+
+        {this.virtualDom ? (
+          <EditorMeta
+            modal={modal}
+            target={"modal-meta"}
+            virtualDom={this.virtualDom}
+          />
+        ) : (
+          false
+        )}
       </>
     );
   }

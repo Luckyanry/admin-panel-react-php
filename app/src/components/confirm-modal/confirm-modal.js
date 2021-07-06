@@ -1,7 +1,6 @@
 import React from "react";
-import UIkit from "uikit";
 
-const ComfirmModal = ({modal, target, method}) => {
+const ComfirmModal = ({modal, target, savePageHandler, method}) => {
   return (
     <div id={target} uk-modal={modal.toString()}>
       <div className="uk-modal-dialog uk-modal-body">
@@ -11,7 +10,7 @@ const ComfirmModal = ({modal, target, method}) => {
 
         <p className="uk-text-right">
           <button
-            className="uk-button uk-button-default uk-modal-close"
+            className="uk-button uk-button-default uk-modal-close uk-margin-small-right"
             type="button"
           >
             Cancel
@@ -20,22 +19,7 @@ const ComfirmModal = ({modal, target, method}) => {
           <button
             className="uk-button uk-button-primary uk-modal-close"
             type="button"
-            onClick={() =>
-              method(
-                () => {
-                  UIkit.notification({
-                    message: "Successfully saved",
-                    status: "success",
-                  });
-                },
-                () => {
-                  UIkit.notification({
-                    message: "Changes not saved!",
-                    status: "danger",
-                  });
-                }
-              )
-            }
+            onClick={() => savePageHandler(method)}
           >
             Save
           </button>

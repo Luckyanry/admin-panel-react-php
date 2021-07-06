@@ -1,24 +1,6 @@
 import React from "react";
-import UIkit from "uikit";
 
-const panel = ({method}) => {
-  const savePageHandler = () => {
-    method(
-      () => {
-        UIkit.notification({
-          message: "Successfully saved",
-          status: "success",
-        });
-      },
-      () => {
-        UIkit.notification({
-          message: "Changes not saved!",
-          status: "danger",
-        });
-      }
-    );
-  };
-
+const panel = ({savePageHandler, method}) => {
   return (
     <div className="panel">
       <button
@@ -40,7 +22,15 @@ const panel = ({method}) => {
       <button
         className="uk-button uk-button-primary uk-margin-small-right"
         type="button"
-        onClick={() => savePageHandler()}
+        uk-toggle="target: #modal-meta"
+      >
+        Edit META
+      </button>
+
+      <button
+        className="uk-button uk-button-primary uk-margin-small-right"
+        type="button"
+        onClick={() => savePageHandler(method)}
       >
         Save
       </button>
