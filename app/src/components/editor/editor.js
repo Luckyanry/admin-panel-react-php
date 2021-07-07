@@ -71,7 +71,7 @@ export default class Editor extends Component {
     this.loadBackupsList();
   }
 
-  async save(onSuccess, onError) {
+  async save() {
     this.isLoading();
     const newDom = this.virtualDom.cloneNode(this.virtualDom);
 
@@ -81,8 +81,8 @@ export default class Editor extends Component {
 
     await axios
       .post("./api/savePage.php", {pageName: this.currentPage, html})
-      .then(onSuccess)
-      .catch(onError)
+      .then(() => this.showNotifications("Successfully saved", "success"))
+      .catch(() => this.showNotifications("Changes not saved!", "danger"))
       .finally(this.isLoaded);
 
     this.loadBackupsList();
@@ -108,7 +108,13 @@ export default class Editor extends Component {
           `[editableimgid="${id}"]`
         );
 
-        new EditorImages(elem, virtualElement);
+        new EditorImages(
+          elem,
+          virtualElement,
+          this.isLoading,
+          this.isLoaded,
+          this.showNotifications
+        );
       });
   }
 
@@ -166,21 +172,8 @@ export default class Editor extends Component {
       .then(() => this.open(this.currentPage, this.isLoaded));
   }
 
-  savePageHandler(method) {
-    method(
-      () => {
-        UIkit.notification({
-          message: "Successfully saved",
-          status: "success",
-        });
-      },
-      () => {
-        UIkit.notification({
-          message: "Changes not saved!",
-          status: "danger",
-        });
-      }
-    );
+  showNotifications(message, status) {
+    UIkit.notification({message, status});
   }
 
   isLoading() {
@@ -212,20 +205,17 @@ export default class Editor extends Component {
 
         {spinner}
 
-        <Panel savePageHandler={this.savePageHandler} method={this.save} />
+        <Panel method={this.save} />
 
-        <ComfirmModal
-          modal={modal}
-          target={"modal-save"}
-          savePageHandler={this.savePageHandler}
-          method={this.save}
-        />
+        <ComfirmModal modal={modal} target={"modal-save"} method={this.save} />
+
         <ChooseModal
           modal={modal}
           target={"modal-open"}
           data={pageList}
           redirect={this.init}
         />
+
         <ChooseModal
           modal={modal}
           target={"modal-backup"}

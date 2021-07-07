@@ -1,6 +1,6 @@
 import React from "react";
 
-const ComfirmModal = ({modal, target, savePageHandler, method}) => {
+const ComfirmModal = ({modal, target, method}) => {
   return (
     <div id={target} uk-modal={modal.toString()}>
       <div className="uk-modal-dialog uk-modal-body">
@@ -19,7 +19,7 @@ const ComfirmModal = ({modal, target, savePageHandler, method}) => {
           <button
             className="uk-button uk-button-primary uk-modal-close"
             type="button"
-            onClick={() => savePageHandler(method)}
+            onClick={() => method()}
           >
             Save
           </button>

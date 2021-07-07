@@ -1,6 +1,6 @@
 import React from "react";
 
-const panel = ({savePageHandler, method}) => {
+const panel = ({method}) => {
   return (
     <div className="panel">
       <button
@@ -30,7 +30,7 @@ const panel = ({savePageHandler, method}) => {
       <button
         className="uk-button uk-button-primary uk-margin-small-right"
         type="button"
-        onClick={() => savePageHandler(method)}
+        onClick={() => method()}
       >
         Save
       </button>
@@ -40,7 +40,7 @@ const panel = ({savePageHandler, method}) => {
         type="button"
         uk-toggle="target: #modal-backup"
       >
-        Restore
+        Backup
       </button>
     </div>
   );

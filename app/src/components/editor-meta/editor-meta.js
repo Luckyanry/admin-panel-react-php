@@ -123,7 +123,7 @@ export class EditorMeta extends Component {
                 type="text"
                 placeholder="Title"
                 data-title
-                value={title}
+                value={title || ""}
                 onChange={(e) => this.onValueChange(e)}
               />
             </div>
@@ -134,7 +134,7 @@ export class EditorMeta extends Component {
                 rows="5"
                 placeholder="Keywords"
                 data-key
-                value={keywords}
+                value={keywords || ""}
                 onChange={(e) => this.onValueChange(e)}
               />
             </div>
@@ -145,7 +145,7 @@ export class EditorMeta extends Component {
                 rows="5"
                 placeholder="Description"
                 data-desc
-                value={description}
+                value={description || ""}
                 onChange={(e) => this.onValueChange(e)}
               />
             </div>
