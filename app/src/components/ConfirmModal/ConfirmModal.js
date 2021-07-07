@@ -1,6 +1,6 @@
 import React from "react";
 
-const ComfirmModal = ({modal, target, method, text}) => {
+const ConfirmModal = ({modal, target, method, text}) => {
   const {title, desc, btn} = text;
 
   return (
@@ -31,4 +31,4 @@ const ComfirmModal = ({modal, target, method, text}) => {
   );
 };
 
-export default ComfirmModal;
+export default ConfirmModal;

@@ -5,38 +5,28 @@ import UIkit from "uikit";
 import "../../helpers/iframeLoader";
 import DOMHelper from "../../helpers/dom-helper";
 
-import EditorText from "../editor-text";
-import Spinner from "../spinner";
-import ComfirmModal from "../confirm-modal";
-import ChooseModal from "../choose-modal";
-import Panel from "../panel";
-import EditorMeta from "../editor-meta";
-import EditorImages from "../editor-images";
-import Login from "../login";
+import EditorText from "../EditorText";
+import Spinner from "../Spinner";
+import ConfirmModal from "../ConfirmModal";
+import ChooseModal from "../ChooseModal";
+import Panel from "../Panel";
+import EditorMeta from "../EditorMeta";
+import EditorImages from "../EditorImages";
+import Login from "../Login";
 
 export default class Editor extends Component {
-  constructor() {
-    super();
+  currentPage = "index.html";
 
-    this.currentPage = "index.html";
-    this.state = {
-      pageList: [],
-      backupsList: [],
-      newPageName: "",
-      loading: true,
-      auth: false,
-      loginError: false,
-      loginLengthError: false,
-    };
-
-    this.isLoading = this.isLoading.bind(this);
-    this.isLoaded = this.isLoaded.bind(this);
-    this.save = this.save.bind(this);
-    this.init = this.init.bind(this);
-    this.login = this.login.bind(this);
-    this.logout = this.logout.bind(this);
-    this.restoreBackup = this.restoreBackup.bind(this);
-  }
+  state = {
+    modal: true,
+    pageList: [],
+    backupsList: [],
+    newPageName: "",
+    loading: true,
+    auth: false,
+    loginError: false,
+    loginLengthError: false,
+  };
 
   componentDidMount() {
     this.checkAuth();
@@ -48,15 +38,15 @@ export default class Editor extends Component {
     }
   }
 
-  checkAuth() {
+  checkAuth = () => {
     axios.get("./api/checkAuth.php").then((res) => {
       this.setState({
         auth: res.data.auth,
       });
     });
-  }
+  };
 
-  login(pass) {
+  login = (pass) => {
     if (pass.length > 5) {
       axios.post("./api/login.php", {password: pass}).then((res) => {
         this.setState({
@@ -71,15 +61,15 @@ export default class Editor extends Component {
         loginLengthError: true,
       });
     }
-  }
+  };
 
-  logout() {
+  logout = () => {
     axios.get("./api/logout.php").then(() => {
       window.location.replace("/");
     });
-  }
+  };
 
-  init(e, page) {
+  init = (e, page) => {
     if (e) {
       e.preventDefault();
     }
@@ -91,9 +81,9 @@ export default class Editor extends Component {
       this.loadPageList();
       this.loadBackupsList();
     }
-  }
+  };
 
-  open(page, cb) {
+  open = (page, cb) => {
     this.currentPage = page;
 
     axios
@@ -114,9 +104,9 @@ export default class Editor extends Component {
       .then(cb);
 
     this.loadBackupsList();
-  }
+  };
 
-  async save() {
+  save = async () => {
     this.isLoading();
     const newDom = this.virtualDom.cloneNode(this.virtualDom);
 
@@ -131,9 +121,9 @@ export default class Editor extends Component {
       .finally(this.isLoaded);
 
     this.loadBackupsList();
-  }
+  };
 
-  enableEditing() {
+  enableEditing = () => {
     this.iframe.contentDocument.body
       .querySelectorAll("text-editor")
       .forEach((elem) => {
@@ -161,9 +151,9 @@ export default class Editor extends Component {
           this.showNotifications
         );
       });
-  }
+  };
 
-  injectStyles() {
+  injectStyles = () => {
     const style = this.iframe.contentDocument.createElement("style");
     style.innerHTML = `
       text-editor:hover, 
@@ -179,15 +169,15 @@ export default class Editor extends Component {
     `;
 
     this.iframe.contentDocument.head.appendChild(style);
-  }
+  };
 
-  loadPageList() {
+  loadPageList = () => {
     axios
       .get("./api/pageList.php")
       .then((res) => this.setState({pageList: res.data}));
-  }
+  };
 
-  loadBackupsList() {
+  loadBackupsList = () => {
     axios.get("./backups/backups.json").then((res) =>
       this.setState({
         backupsList: res.data.filter((backup) => {
@@ -195,9 +185,9 @@ export default class Editor extends Component {
         }),
       })
     );
-  }
+  };
 
-  restoreBackup(e, backup) {
+  restoreBackup = (e, backup) => {
     if (e) {
       e.preventDefault();
     }
@@ -215,28 +205,34 @@ export default class Editor extends Component {
         });
       })
       .then(() => this.open(this.currentPage, this.isLoaded));
-  }
+  };
 
-  showNotifications(message, status) {
+  showNotifications = (message, status) => {
     UIkit.notification({message, status});
-  }
+  };
 
-  isLoading() {
+  isLoading = () => {
     this.setState({loading: true});
-  }
+  };
 
-  isLoaded() {
+  isLoaded = () => {
     this.setState({
       loading: false,
     });
-  }
+  };
 
   render() {
-    const {loading, pageList, backupsList, auth, loginError, loginLengthError} =
-      this.state;
-    const modal = true;
-    let spinner;
+    const {
+      loading,
+      pageList,
+      backupsList,
+      auth,
+      loginError,
+      loginLengthError,
+      modal,
+    } = this.state;
 
+    let spinner;
     loading ? (spinner = <Spinner active />) : <Spinner />;
 
     if (!auth) {
@@ -264,7 +260,7 @@ export default class Editor extends Component {
 
         <Panel method={this.save} />
 
-        <ComfirmModal
+        <ConfirmModal
           modal={modal}
           target={"modal-save"}
           method={this.save}
@@ -275,7 +271,7 @@ export default class Editor extends Component {
           }}
         />
 
-        <ComfirmModal
+        <ConfirmModal
           modal={modal}
           target={"modal-logout"}
           method={this.logout}

@@ -1,6 +1,6 @@
 import React from "react";
 
-const panel = ({method}) => {
+const Panel = ({method}) => {
   return (
     <div className="panel">
       <button
@@ -54,4 +54,4 @@ const panel = ({method}) => {
   );
 };
 
-export default panel;
+export default Panel;

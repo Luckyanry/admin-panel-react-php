@@ -11,6 +11,7 @@ export default class EditorImages {
 
     this.element.addEventListener("click", () => this.onClick());
     this.imgUploader = document.querySelector("#img-upload");
+
     this.isLoading = isLoading;
     this.isLoaded = isLoaded;
     this.showNotifications = showNotifications;

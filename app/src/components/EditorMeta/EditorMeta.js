@@ -1,18 +1,13 @@
 import React, {Component} from "react";
-import {timestamp} from "rxjs/operators";
 
 export class EditorMeta extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      meta: {
-        title: "",
-        keywords: "",
-        description: "",
-      },
-    };
-  }
+  state = {
+    meta: {
+      title: "",
+      keywords: "",
+      description: "",
+    },
+  };
 
   componentDidMount() {
     this.getMeta(this.props.virtualDom);
@@ -24,12 +19,13 @@ export class EditorMeta extends Component {
     }
   }
 
-  getMeta(virtualDom) {
+  getMeta = (virtualDom) => {
     this.title =
       virtualDom.head.querySelector("title") ||
       virtualDom.head.appendChild(virtualDom.createElement("title"));
 
     this.keywords = virtualDom.head.querySelector("meta[name='keywords']");
+
     if (!this.keywords) {
       this.keywords = virtualDom.head.appendChild(
         virtualDom.createElement("meta")
@@ -41,6 +37,7 @@ export class EditorMeta extends Component {
     this.description = virtualDom.head.querySelector(
       "meta[name='description']"
     );
+
     if (!this.description) {
       this.description = virtualDom.head.appendChild(
         virtualDom.createElement("meta")
@@ -56,15 +53,15 @@ export class EditorMeta extends Component {
         description: this.description.getAttribute("content"),
       },
     });
-  }
+  };
 
-  applyMeta() {
+  applyMeta = () => {
     this.title.innerHTML = this.state.meta.title;
     this.keywords.setAttribute("content", this.state.meta.keywords);
     this.description.setAttribute("content", this.state.meta.description);
-  }
+  };
 
-  onValueChange(e) {
+  onValueChange = (e) => {
     if (e.target.getAttribute("data-title")) {
       e.persist();
 
@@ -105,7 +102,7 @@ export class EditorMeta extends Component {
         };
       });
     }
-  }
+  };
 
   render() {
     const {modal, target} = this.props;

@@ -1,18 +1,15 @@
 import React, {Component} from "react";
 
 export default class Login extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      pass: "",
-    };
-  }
+  state = {
+    pass: "",
+  };
 
-  onPasswordChange(e) {
+  onPasswordChange = (e) => {
     this.setState({
       pass: e.target.value,
     });
-  }
+  };
 
   render() {
     const {pass} = this.state;
