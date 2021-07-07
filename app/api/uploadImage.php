@@ -13,6 +13,11 @@ if (file_exists($_FILES["image"]["tmp_name"]) && is_uploaded_file($_FILES["image
   // Створюємо унікальне ім'я файла
   $fileName = uniqid() . "." . $fileExt;
 
+  // перевіряємо на наявність папки, в разі потреби - створюємо її
+  if (!is_dir("../../img/")) {
+    mkdir("../../img/");
+  }
+
   move_uploaded_file($_FILES["image"]["tmp_name"], "../../img/" . $fileName);
 
   // повертаємо шлях зображення з сервера на клієнта, "src" повернеться як $fileName
