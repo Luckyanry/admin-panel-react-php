@@ -25,6 +25,8 @@ export default class Editor extends Component {
       newPageName: "",
       loading: true,
       auth: false,
+      loginError: false,
+      loginLengthError: false,
     };
 
     this.isLoading = this.isLoading.bind(this);
@@ -32,6 +34,7 @@ export default class Editor extends Component {
     this.save = this.save.bind(this);
     this.init = this.init.bind(this);
     this.login = this.login.bind(this);
+    this.logout = this.logout.bind(this);
     this.restoreBackup = this.restoreBackup.bind(this);
   }
 
@@ -47,7 +50,6 @@ export default class Editor extends Component {
 
   checkAuth() {
     axios.get("./api/checkAuth.php").then((res) => {
-      console.log(res.data);
       this.setState({
         auth: res.data.auth,
       });
@@ -59,9 +61,22 @@ export default class Editor extends Component {
       axios.post("./api/login.php", {password: pass}).then((res) => {
         this.setState({
           auth: res.data.auth,
+          loginError: !res.data.auth,
+          loginLengthError: false,
         });
       });
+    } else {
+      this.setState({
+        loginError: false,
+        loginLengthError: true,
+      });
     }
+  }
+
+  logout() {
+    axios.get("./api/logout.php").then(() => {
+      window.location.replace("/");
+    });
   }
 
   init(e, page) {
@@ -217,20 +232,25 @@ export default class Editor extends Component {
   }
 
   render() {
-    const {loading, pageList, backupsList, auth} = this.state;
+    const {loading, pageList, backupsList, auth, loginError, loginLengthError} =
+      this.state;
     const modal = true;
     let spinner;
 
     loading ? (spinner = <Spinner active />) : <Spinner />;
 
     if (!auth) {
-      return <Login login={this.login} />;
+      return (
+        <Login
+          login={this.login}
+          loginErr={loginError}
+          lengthErr={loginLengthError}
+        />
+      );
     }
 
     return (
       <>
-        <Login login={this.login} />
-
         <iframe src="" frameBorder="0"></iframe>
 
         <input
@@ -244,7 +264,27 @@ export default class Editor extends Component {
 
         <Panel method={this.save} />
 
-        <ComfirmModal modal={modal} target={"modal-save"} method={this.save} />
+        <ComfirmModal
+          modal={modal}
+          target={"modal-save"}
+          method={this.save}
+          text={{
+            title: "Apply changes",
+            desc: "Are you sure you want to save the changes?",
+            btn: "Save",
+          }}
+        />
+
+        <ComfirmModal
+          modal={modal}
+          target={"modal-logout"}
+          method={this.logout}
+          text={{
+            title: "LogOut",
+            desc: "Are you sure you want to logout?",
+            btn: "Confirm",
+          }}
+        />
 
         <ChooseModal
           modal={modal}

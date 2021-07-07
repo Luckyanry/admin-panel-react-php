@@ -1,12 +1,14 @@
 import React from "react";
 
-const ComfirmModal = ({modal, target, method}) => {
+const ComfirmModal = ({modal, target, method, text}) => {
+  const {title, desc, btn} = text;
+
   return (
     <div id={target} uk-modal={modal.toString()}>
       <div className="uk-modal-dialog uk-modal-body">
-        <h2 className="uk-modal-title">Preservation</h2>
+        <h2 className="uk-modal-title">{title}</h2>
 
-        <p>Are you sure you want to save the changes?</p>
+        <p>{desc}</p>
 
         <p className="uk-text-right">
           <button
@@ -21,7 +23,7 @@ const ComfirmModal = ({modal, target, method}) => {
             type="button"
             onClick={() => method()}
           >
-            Save
+            {btn}
           </button>
         </p>
       </div>

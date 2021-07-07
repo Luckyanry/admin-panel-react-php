@@ -1,17 +1,23 @@
 <?php
+session_start();
+if ($_SESSION["auth"] != true) {
+  header("HTTP/1.0 403 Forbidden");
+  die; // якщо виконується скрипт, код далі не відпрацьовує
+}
+
 $_POST = json_decode(file_get_contents("php://input"), true);
 
 $file = $_POST["pageName"];
 $newHTML = $_POST["html"];
 
 // перевіряємо чи існує папка, якщо ні - створюємо її
-if(!is_dir("../backups/")) {
+if (!is_dir("../backups/")) {
   mkdir("../backups/");
 }
 
 // Якщо файл існує - декодуємо і записуємо в змінну, якщо ні - записуємо []
 $backups = json_decode(file_get_contents("../backups/backups.json"));
-if(!is_array($backups)) {
+if (!is_array($backups)) {
   $backups = [];
 }
 

@@ -36,11 +36,19 @@ const panel = ({method}) => {
       </button>
 
       <button
-        className="uk-button uk-button-default"
+        className="uk-button uk-button-default uk-margin-small-right"
         type="button"
         uk-toggle="target: #modal-backup"
       >
         Backup
+      </button>
+
+      <button
+        className="uk-button uk-button-danger"
+        type="button"
+        uk-toggle="target: #modal-logout"
+      >
+        LogOut
       </button>
     </div>
   );
